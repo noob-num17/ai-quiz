@@ -25,18 +25,18 @@ services:
 
   # Python 应用服务
   app:
-    image: ghcr.io/noob-num17/ai-quiz:sha-aa41652  # 更新为最新的 tag
+    image: ghcr.io/noob-num17/ai-quiz:sha-9bb4e49  # 更新为最新的 tag
     container_name: learning-agent-app
     environment:
       # MongoDB 连接配置
       MONGO_URI: mongodb://root:password123@mongodb:27017/learning_agent?authSource=admin
       # OpenAI 配置（需要在运行时设置）
       OPENAI_API_KEY: sk-hxpkpcjxfgysnggjprvnognsoplbejgjvgntthsqkofcmnvz
-      OPENAI_BASE_URL: https://api.openai.com/v1/
+      OPENAI_BASE_URL: https://api.siliconflow.cn/v1
       OPENAI_MODEL: deepseek-ai/DeepSeek-V3.2
       EMBEDDING_MODEL: Qwen/Qwen3-Embedding-8B
       # 流式输出配置
-      ENABLE_STREAM: "True"
+      ENABLE_STREAM: "False"
       DEBUG: "False"
     depends_on:
       mongodb:
