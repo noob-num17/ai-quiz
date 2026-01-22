@@ -63,6 +63,8 @@ services:
       # OpenAI 配置（需要在运行时设置）
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1/}
+      OPENAI_MODEL: ${OPENAI_MODEL:-deepseek-ai/DeepSeek-V3.2}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-Qwen/Qwen3-Embedding-8B}
       # 流式输出配置
       ENABLE_STREAM: "True"
       DEBUG: "False"
@@ -108,13 +110,12 @@ docker compose down
 
 ### 环境变量配置
 
-| 变量 | 说明 | 示例 |
+| 变量 | 说明 | 默认 |
 |------|------|------|
 | `OPENAI_API_KEY` | OpenAI API 密钥（必需） | `sk-...` |
 | `OPENAI_BASE_URL` | OpenAI API 端点（可选） | `https://api.openai.com/v1/` |
 | `OPENAI_MODEL` | 使用的Chat模型（可选） | `deepseek-ai/DeepSeek-V3.2` |
 | `EMBEDDING_MODEL` | 使用的Embedding模型（可选） | `Qwen/Qwen3-Embedding-8B`|
-| `MONGO_URI` | MongoDB 连接字符串 | `mongodb://root:password123@mongodb:27017/learning_agent` |
 
 
 ## 文档
