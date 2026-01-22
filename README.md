@@ -1,17 +1,35 @@
 # ai-quiz
+**LLMAgent 学习评估与巩固系统**是一个基于大型语言模型（LLM）的个性化学习智能体系统，通过 cli 与用户交互，能够自动生成评估题目、智能判卷、分析学习弱点，并提供个性化学习建议。
 
-LLMAgent 学习评估与巩固系统 - 基于 AI 的个性化学习智能体
+---
 
-## 快速开始
+## 项目架构概述
+### 架构图示
+![1](images/1.PNG)
 
-### 使用指南
+### 数据流动图
+![2](images/2.PNG)
 
-#### 第一步：拉取 Docker 镜像
+### CI/CD 工作流
 
-```bash
-docker pull ghcr.io/noob-num17/ai-quiz:sha-aa41652
-```
+- **pytest** - 自动化测试（`.github/workflows/pytest.yml`）
+- **Docker Build & Push** - 镜像构建和推送（`.github/workflows/docker-publish.yml`）
 
+## 详细的技术文档
+
+- [系统架构设计](./doc/ARCHITECTURE.md) - 详细的架构文档和云原生组件说明
+- [LLM Agent 智能体策略](./doc/AGENT_STRATEGY.md) - Prompt 模板、设计过程和工具链
+- [测试说明](./test/README.md) - 测试套件和单元测试指南
+
+
+## 如何运行
+### 第一步：docker-compose.yml
+- 下载或复制 [docker-compose文件](docker-compose.yml) 到本地
+- 修改文件中第二个镜像的 tag（28行），确保使用最新的镜像版本。
+
+>```yaml
+>    image: ghcr.io/noob-num17/ai-quiz:sha-aa41652  # 替换为最新的镜像 tag
+>```
 > **注意**：镜像 tag 可能会更新。请根据最新的 GitHub Actions 构建结果替换 `sha-aa41652`。
 > 
 > 查看最新 tag：
@@ -23,81 +41,21 @@ docker pull ghcr.io/noob-num17/ai-quiz:sha-aa41652
 > docker search ghcr.io/noob-num17/ai-quiz
 > ```
 
-#### 第二步：创建 docker-compose.yml 文件
+- (可选) 修改环境变量配置。
+    - docker-compose.yml 文件中的环境变量配置说明
 
-在本地项目目录下创建 `docker-compose.yml` 文件：
+    | 变量 | 说明 | 默认 |
+    |------|------|------|
+    | `OPENAI_API_KEY` | OpenAI API 密钥（可选，如果我的key还能用） | `sk-hxpkpcjxfgysnggjprvnognsoplbejgjvgntthsqkofcmnvz` |
+    | `OPENAI_BASE_URL` | OpenAI API 端点（可选） | `https://api.openai.com/v1/` |
+    | `OPENAI_MODEL` | 使用的Chat模型（可选） | `deepseek-ai/DeepSeek-V3.2` |
 
-```yaml
-version: '3.8'
 
-services:
-  # MongoDB 数据库服务
-  mongodb:
-    image: mongo:7.0
-    container_name: learning-agent-mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password123
-      MONGO_INITDB_DATABASE: learning_agent
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
-    networks:
-      - learning-network
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  # Python 应用服务
-  app:
-    image: ghcr.io/noob-num17/ai-quiz:sha-aa41652  # ⚠️ 更新为最新的 tag
-    container_name: learning-agent-app
-    environment:
-      # MongoDB 连接配置
-      MONGO_URI: mongodb://root:password123@mongodb:27017/learning_agent?authSource=admin
-      # OpenAI 配置（需要在运行时设置）
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1/}
-      OPENAI_MODEL: ${OPENAI_MODEL:-deepseek-ai/DeepSeek-V3.2}
-      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-Qwen/Qwen3-Embedding-8B}
-      # 流式输出配置
-      ENABLE_STREAM: "True"
-      DEBUG: "False"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - learning-network
-    restart: unless-stopped
-    stdin_open: true
-    tty: true
-
-volumes:
-  mongodb_data:
-  mongodb_config:
-
-networks:
-  learning-network:
-    driver: bridge
-```
-
-#### 第三步：运行应用
+#### 第二步：运行应用
 
 在终端中运行以下命令：
 
 ```bash
-# 进入项目目录
-cd /path/to/ai-quiz
-
-# 设置环境变量（OpenAI API Key）
-export OPENAI_API_KEY="your-api-key-here"
-export OPENAI_BASE_URL="https://api.openai.com/v1/"  # 可选
-
 # 启动容器组
 docker compose up -d
 
@@ -108,65 +66,9 @@ docker attach learning-agent-app
 docker compose down
 ```
 
-### 环境变量配置
-
-| 变量 | 说明 | 默认 |
-|------|------|------|
-| `OPENAI_API_KEY` | OpenAI API 密钥（必需） | `sk-...` |
-| `OPENAI_BASE_URL` | OpenAI API 端点（可选） | `https://api.openai.com/v1/` |
-| `OPENAI_MODEL` | 使用的Chat模型（可选） | `deepseek-ai/DeepSeek-V3.2` |
-| `EMBEDDING_MODEL` | 使用的Embedding模型（可选） | `Qwen/Qwen3-Embedding-8B`|
-
-
-## 文档
-
-- [系统架构设计](./doc/ARCHITECTURE.md) - 详细的架构文档和云原生组件说明
-- [LLM Agent 智能体策略](./doc/AGENT_STRATEGY.md) - Prompt 模板、设计过程和工具链
-- [测试说明](./test/README.md) - 测试套件和单元测试指南
-
 ---
 
-## 项目结构
-
-```
-├── main.py                    # 应用入口
-├── requirements.txt           # Python 依赖
-├── Dockerfile                 # Docker 构建文件
-├── docker-compose.yml         # 本地开发编排
-├── models/                    # 核心模块
-│   ├── agent.py              # LLMAgent 主控引擎
-│   ├── question_generator.py # 题目生成器
-│   ├── answer_evaluator.py   # 答案评估器
-│   ├── weakness_analyzer.py  # 弱点分析器
-│   ├── data_processor.py     # 数据处理器
-│   ├── mongodb_client.py     # 数据库客户端
-│   └── cli.py                # 命令行界面
-├── test/                      # 测试套件
-│   ├── test_agent.py
-│   ├── test_question_generator.py
-│   ├── test_answer_evaluator.py
-│   ├── test_data_processor.py
-│   └── test_cli_integration.py
-└── doc/                       # 文档
-    ├── ARCHITECTURE.md        # 架构设计
-    └── AGENT_STRATEGY.md      # Agent 策略
-```
-
----
-
-## CI/CD 工作流
-
-- **pytest** - 自动化测试（`.github/workflows/pytest.yml`）
-- **Docker Build & Push** - 镜像构建和推送（`.github/workflows/docker-publish.yml`）
-
----
-
-## 技术栈
-
-- **LLM**: OpenAI API / DeepSeek
-- **数据库**: MongoDB 7.0
-- **容器化**: Docker & Docker Compose
-- **Python**: 3.10+
-- **测试**: pytest
-
----
+## 项目分工
+- 组内均分
+- 邓锦：主要负责 Agent，cli命令行，pytest 的代码实现。
+- 施煦屹：只要负责架构设计，Dockerfile，CI/CD，文档等其他的实现。
