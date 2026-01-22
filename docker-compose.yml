@@ -25,7 +25,7 @@ services:
 
   # Python 应用服务
   app:
-    image: ghcr.io/noob-num17/ai-quiz:sha-9bb4e49  # 更新为最新的 tag
+    image: ghcr.io/noob-num17/ai-quiz:sha-9d90d07  # 更新为最新的 tag
     container_name: learning-agent-app
     environment:
       # MongoDB 连接配置
@@ -36,7 +36,7 @@ services:
       OPENAI_MODEL: deepseek-ai/DeepSeek-V3.2
       EMBEDDING_MODEL: Qwen/Qwen3-Embedding-8B
       # 流式输出配置
-      ENABLE_STREAM: "False"
+      ENABLE_STREAM: "True"
       DEBUG: "False"
     depends_on:
       mongodb:
